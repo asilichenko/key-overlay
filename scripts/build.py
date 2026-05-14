@@ -20,12 +20,11 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-import os
 import shutil
 import subprocess
 from pathlib import Path
 
-THIS: Path = Path(os.path.dirname(__file__))
+THIS: Path = Path(__file__).parent
 
 SPEC_FILE_NAME: Path = THIS / 'app.spec'
 BUILD_PATH = THIS / '../build'
