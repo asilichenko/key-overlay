@@ -42,9 +42,8 @@ class KeyOverlay:
         self.root.configure(bg="#010101")
 
         self.pressed: set[keyboard.Key] = set()
-        self.canvas: tk.Canvas | None = None
+        self.canvas: tk.Canvas = self._build_window()
 
-        self._build_window()
         self._redraw()
 
         self.listener = keyboard.Listener(
@@ -52,20 +51,30 @@ class KeyOverlay:
             on_release=self._on_release)
         self.listener.start()
 
-    def _on_press(self, key):
+    def _on_press(self, key) -> bool | None:
+        """
+        Handle a keyboard key press.
+
+        Returning False stops the keyboard listener.
+
+        Returning True or None allows the listener to continue running.
+        """
         if key == keyboard.Key.esc:
             self.root.after(0, self.root.quit)
-            return False
+            return False  # Stop Listener
+
         if key in KEY_LABELS:
             self.pressed.add(key)
             self.root.after(0, self._redraw)
+
+        return True  # Continue
 
     def _on_release(self, key):
         if key in KEY_LABELS:
             self.pressed.discard(key)
             self.root.after(0, self._redraw)
 
-    def _build_window(self):
+    def _build_window(self) -> tk.Canvas:
         win_w = config.WINDOW_PAD_X * 2 + config.COLS * config.KEY_W + (config.COLS - 1) * config.GAP
         win_h = config.WINDOW_PAD_Y * 2 + config.ROWS * config.KEY_H + (
                 config.ROWS - 1) * config.GAP + config.KEY_OFFSET
@@ -77,10 +86,9 @@ class KeyOverlay:
 
         self.root.geometry(f"{win_w}x{win_h}+{wx}+{wy}")
 
-        self.canvas = tk.Canvas(self.root,
-                                width=win_w, height=win_h,
-                                bg="#010101", highlightthickness=0)
-        self.canvas.pack()
+        retval = tk.Canvas(self.root, width=win_w, height=win_h, bg="#010101", highlightthickness=0)
+        retval.pack()
+        return retval
 
     def _redraw(self):
         self.canvas.delete("all")
